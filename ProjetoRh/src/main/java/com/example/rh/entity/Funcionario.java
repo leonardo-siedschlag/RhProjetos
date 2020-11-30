@@ -16,6 +16,9 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.example.rh.entity.enums.DiaDescanso;
+import com.example.rh.entity.enums.DsrTipos;
+import com.example.rh.entity.enums.Setor;
 import com.example.rh.entity.enums.StatusFuncionario;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -34,36 +37,49 @@ public class Funcionario implements Serializable {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private Date dateAdmissao;
 	private Double valorHora;
+	private int horasSemanais;
 	private Integer codigoFuncionarioStatus;
+	private double percentualFeriados;
+	private double percentualAdicionalNoturno;
+	private Integer setor;
+	private Integer dsrTipos;
+	private Integer diaDescanso;
+	private Integer jornada;
+	private Integer porcentagemHorasExtras;
 	@JsonIgnore
 	@OneToMany(mappedBy = "funcionario", cascade = CascadeType.ALL)
 	private Set<CartaoPonto> cartaoPonto = new HashSet<>();
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "funcionario")
+	@OneToMany(mappedBy = "funcionario", cascade = CascadeType.ALL)
 	private List<FolhaPagamento> folha = new ArrayList<>();
-
-	
 
 	public Funcionario() {
 	}
 
-	public Funcionario(Long id, String nome, String cpf, Date dateAdmissao, Double valorHora,
-			StatusFuncionario status) {
+	public Funcionario(Long id, String nome, String cpf, Date dateAdmissao, Double valorHora, int horasSemanais,
+			StatusFuncionario status, double percentualFeriados, double percentualAdicionalNight, Setor setor,
+			DsrTipos dsr, DiaDescanso diaDescanso, Integer jornada, Integer porcentagemHorasExtras) {
 		super();
 		this.id = id;
 		this.nome = nome;
 		this.cpf = cpf;
 		this.dateAdmissao = dateAdmissao;
 		this.valorHora = valorHora;
+		this.horasSemanais = horasSemanais;
 		setFuncionarioStatus(status);
+		setSetor(setor);
+		setDsrTipos(dsr);
+		setDiaDescanso(diaDescanso);
+		this.percentualFeriados = percentualFeriados;
+		this.percentualAdicionalNoturno = percentualAdicionalNight;
+		this.jornada = jornada;
+		this.porcentagemHorasExtras = porcentagemHorasExtras;
 	}
 
 	public StatusFuncionario getStatusFuncionario() {
 
 		return StatusFuncionario.funcFuncionarioStatus(codigoFuncionarioStatus);// converte um numero value para ordem
-																				// status
-
 	}
 
 	public void setFuncionarioStatus(StatusFuncionario statusFuncionario) {
@@ -71,6 +87,36 @@ public class Funcionario implements Serializable {
 			this.codigoFuncionarioStatus = statusFuncionario.getCode();
 		}
 
+	}
+
+	public Setor getSetor() {
+		return Setor.getSetor(setor);
+	}
+
+	public void setSetor(Setor setor) {
+		if (setor != null) {
+			this.setor = setor.getCodigo();
+		}
+	}
+
+	public DsrTipos getDsrTipos() {
+		return DsrTipos.getDsrTipos(dsrTipos);
+	}
+
+	public void setDsrTipos(DsrTipos dsr) {
+		if (dsr != null) {
+			this.dsrTipos = dsr.getCodigo();
+		}
+	}
+
+	public DiaDescanso getDiaDescanso() {
+		return DiaDescanso.getDiaDescanso(diaDescanso);
+	}
+
+	public void setDiaDescanso(DiaDescanso diaDescanso) {
+		if (diaDescanso != null) {
+			this.diaDescanso = diaDescanso.getCode();
+		}
 	}
 
 	public Long getId() {
@@ -113,6 +159,14 @@ public class Funcionario implements Serializable {
 		this.valorHora = valorHora;
 	}
 
+	public int getHorasSemanais() {
+		return horasSemanais;
+	}
+
+	public void setHorasSemanais(int horasSemanais) {
+		this.horasSemanais = horasSemanais;
+	}
+
 	public Set<CartaoPonto> getCartaoPonto() {
 		return cartaoPonto;
 	}
@@ -127,6 +181,38 @@ public class Funcionario implements Serializable {
 
 	public void setFolha(List<FolhaPagamento> folha) {
 		this.folha = folha;
+	}
+
+	public double getPercentualFeriados() {
+		return percentualFeriados;
+	}
+
+	public void setPercentualFeriados(double percentualFeriados) {
+		this.percentualFeriados = percentualFeriados;
+	}
+
+	public double getPercentualAdicionalNoturno() {
+		return percentualAdicionalNoturno;
+	}
+
+	public void setPercentualAdicionalNoturno(double percentualAdicionalNoturno) {
+		this.percentualAdicionalNoturno = percentualAdicionalNoturno;
+	}
+
+	public Integer getJornada() {
+		return jornada;
+	}
+
+	public void setJornada(Integer jornada) {
+		this.jornada = jornada;
+	}
+
+	public Integer getPorcentagemHorasExtras() {
+		return porcentagemHorasExtras;
+	}
+
+	public void setPorcentagemHorasExtras(Integer porcentagemHorasExtras) {
+		this.porcentagemHorasExtras = porcentagemHorasExtras;
 	}
 
 	@Override

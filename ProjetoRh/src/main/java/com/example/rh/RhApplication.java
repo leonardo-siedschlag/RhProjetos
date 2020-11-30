@@ -1,8 +1,7 @@
 package com.example.rh;
 
-import java.sql.Time;
-import java.time.LocalTime;
-import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,21 +10,21 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class RhApplication {
 
 	public static void main(String[] args) {
-		 SpringApplication.run(RhApplication.class, args);
-//		 String estado = "12:13:14";  
-//		 LocalTime horaPedido = LocalTime.parse(estado);
-//		 LocalTime horaAgora = LocalTime.now();
-//	     LocalTime horaPedidoSubtraida = horaPedido.minusMinutes(20);
-//	     
-//	     
-//	     
-//	     Time t =  Time.valueOf(estado);
-//	     int s= t.getMinutes();
-	     
-	   
-	     
-		 
-		 
+		SpringApplication.run(RhApplication.class, args);
+//		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//
+//		LocalDateTime dateTime1= LocalDateTime.parse("2014-11-25 00:30:00", formatter);
+//		LocalDateTime dateTime2= LocalDateTime.parse("2014-11-25 01:30:00", formatter);
+//
+//		long diffInMilli = java.time.Duration.between(dateTime1, dateTime2).toMillis();
+//		long diffInSeconds = java.time.Duration.between(dateTime1, dateTime2).getSeconds();
+//		long diffInMinutes = java.time.Duration.between(dateTime1, dateTime2).toMinutes();
+//		long diffInHours = java.time.Duration.between(dateTime1, dateTime2).toHours();
+//		System.out.println(diffInMinutes);
+//		System.out.println(diffInHours);
 		
+		// sysout + ctrl + espaco
+		// CTRL + shift + O. retira importacoes
 	}
+
 }

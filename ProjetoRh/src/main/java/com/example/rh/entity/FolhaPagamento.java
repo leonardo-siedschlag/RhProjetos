@@ -1,8 +1,11 @@
 package com.example.rh.entity;
 
 import java.io.Serializable;
+import java.sql.Date;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -16,6 +19,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.example.rh.entity.enums.SemanaM;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
@@ -27,23 +31,39 @@ public class FolhaPagamento implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long oid;
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
-	private Instant data;
+	private Instant lancamento;
+
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	private Date dateAbertura;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	private Date dateFechamento;
 
 	@ManyToOne
 	@JoinColumn(name = "funcionario_id")
 	private Funcionario funcionario;
 
-	@OneToMany(mappedBy = "folhaPagamento", cascade=CascadeType.ALL)
+	@OneToMany(mappedBy = "folhaPagamento", cascade = CascadeType.ALL)
 	private Set<CartaoPonto> cartaoPonto = new HashSet<>();
+
+	private int diasUteisMes;
+	private double descontoFeriado;
+	private double salarioMensalBruto;
+	private int tolerance;
+	private double sindicato;
 
 	public FolhaPagamento() {
 	}
 
-	public FolhaPagamento(Long oid, Instant data, Funcionario funcionario) {
+	public FolhaPagamento(Long oid, Instant lancamento, Date abertura, Date fechamento, Funcionario funcionario,
+			int diasUteisMes, int tolerance, double sindicato) {
 		this.oid = oid;
-		this.data = data;
+		this.lancamento = lancamento;
+		this.dateAbertura = abertura;
+		this.dateFechamento = fechamento;
 		this.funcionario = funcionario;
-
+		this.diasUteisMes = diasUteisMes;
+		this.tolerance = tolerance;
+		this.sindicato = sindicato;
 	}
 
 	public Long getId() {
@@ -54,12 +74,28 @@ public class FolhaPagamento implements Serializable {
 		this.oid = oid;
 	}
 
-	public Instant getData() {
-		return data;
+	public Instant getLancamento() {
+		return lancamento;
 	}
 
-	public void setData(Instant data) {
-		this.data = data;
+	public void setLancamento(Instant lancamento) {
+		this.lancamento = lancamento;
+	}
+
+	public Date getDateAbertura() {
+		return dateAbertura;
+	}
+
+	public void setDateAbertura(Date dateAbertura) {
+		this.dateAbertura = dateAbertura;
+	}
+
+	public Date getDateFechamento() {
+		return dateFechamento;
+	}
+
+	public void setDateFechamento(Date dateFechamento) {
+		this.dateFechamento = dateFechamento;
 	}
 
 	public Funcionario getFuncionario() {
@@ -70,22 +106,95 @@ public class FolhaPagamento implements Serializable {
 		this.funcionario = funcionario;
 	}
 
-	public Set<CartaoPonto> getCartaoPonto() {
-		return cartaoPonto;
-	}
-
 	public void setCartaoPonto(Set<CartaoPonto> cartaoPonto) {
 		this.cartaoPonto = cartaoPonto;
 	}
 
-	public double getSalarioMensal() {
-		double s = 0.0;
-		for (CartaoPonto p : cartaoPonto) {
-			s += p.getSalarioDia();
+	public int getDiasUteisMes() {
+		return diasUteisMes;
+	}
 
+	public void setDiasUteisMes(int diasUteisMes) {
+		this.diasUteisMes = diasUteisMes;
+	}
+
+	public int getTolerance() {
+		return tolerance;
+	}
+
+	public void setTolerance(int tolerance) {
+		this.tolerance = tolerance;
+	}
+
+	public double getSindicato() {
+		return sindicato;
+	}
+
+	public void setSindicato(double sindicato) {
+		this.sindicato = sindicato;
+	}
+
+	public List<CartaoPonto> getIntervaloAF() {
+		// GET DATAS ENTRE ABERTURA E FECHAMENTO
+		List<CartaoPonto> cartaPonto = new ArrayList<>();
+		for (CartaoPonto c : cartaoPonto) {
+			Date cal = c.getData();
+			if (cal.before(dateAbertura) || cal.after(dateFechamento)) {
+				System.out.println();
+			} else {
+				cartaPonto.add(c);
+			}
 		}
-		return s;
+		return cartaPonto;
+	}
 
+	public double getSalarioMensalBruto() {
+		double salario = 0.0;
+		for (CartaoPonto p : getIntervaloAF()) {
+			salario += p.getSalarioDia();
+		}
+		salarioMensalBruto = salario;
+		return salarioMensalBruto;
+	}
+
+	public double getChamaDsrMensalistaSoma() {
+
+		double soma = 0;
+		soma += getDsrMensalistaSoma(SemanaM.PrimeiraSemana);
+		soma += getDsrMensalistaSoma(SemanaM.SegundaSemana);
+		soma += getDsrMensalistaSoma(SemanaM.TerceiraSemana);
+		soma += getDsrMensalistaSoma(SemanaM.QuartaSemana);
+		double dsrCalculo = CaculoDsrMensalista.FormatacaoSalario((getSalarioMensalBruto() * soma) / diasUteisMes);
+
+		return dsrCalculo;
+	}
+
+	public int getDsrMensalistaSoma(SemanaM semana) {
+
+		double retornoMinutos = 0;
+		int verificacaoSemanaFeriado = 0;
+		for (CartaoPonto ponto : getIntervaloAF()) {
+			retornoMinutos += CaculoDsrMensalista.getMinutosTrabalhados(semana, ponto.getSemana(), ponto, funcionario);
+			verificacaoSemanaFeriado += CaculoDsrMensalista.getSemanaFeriado(semana, ponto.getSemana(), ponto);
+		}
+		int verificacao = CaculoDsrMensalista.getCalculoVerificacao(retornoMinutos, funcionario, tolerance);
+		
+		if (verificacao == 0 && verificacaoSemanaFeriado == 1) {
+			this.descontoFeriado += this.funcionario.getJornada() * this.funcionario.getValorHora();
+		}
+
+		return verificacao;
+	}
+
+	public double getSalarioLiquido() {
+
+		double descontoInss = CalculoSalarioFuncionario.getTabelaCalculoInssFuncionario(salarioMensalBruto);
+		double salarioDInss = salarioMensalBruto - descontoInss;
+		double irrf = CalculoSalarioFuncionario.getTabelaCalculoIRRF_Funcionario(salarioDInss);
+		double salarioLiquidoMensal = Math.round(
+				(salarioMensalBruto + getChamaDsrMensalistaSoma()) - descontoInss - irrf - sindicato - descontoFeriado);
+
+		return salarioLiquidoMensal;
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package com.example.rh.entity.enums;
 
 public enum StatusFuncionario {
 	
-	ATIVO(1), DEMITIDO(2);
+	ATIVO(1), INATIVO(2);
 	
 	private int cod;
 	
@@ -17,7 +17,7 @@ public enum StatusFuncionario {
 	public static StatusFuncionario funcFuncionarioStatus(int cod) {
 		
 		for(StatusFuncionario value: StatusFuncionario.values()) {
-			if(value.getCode() ==cod) {
+			if(value.getCode()==cod) {
 				return value;
 			}
 		}
